@@ -1,16 +1,13 @@
 ﻿using DormitoryCounter.Model;
 using HtmlAgilityPack;
+using MiniExcelLibs;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -52,6 +49,10 @@ namespace DormitoryCounter.Implementation
             var serializeResult = JsonSerializer.Serialize(user, options);
             return new StringContent(serializeResult, Encoding.UTF8);
         }
+        public static PointHistory GeneratePointHistory(HtmlDocument document)
+        {
+            throw new NotImplementedException();
+        }
         public async static Task<bool> Query(string userName, string passWord, DateOnly startDate, DateOnly endDate, string targetOutputFile)
         {
             try
@@ -80,9 +81,10 @@ namespace DormitoryCounter.Implementation
                 loginRequest.Headers.Add("X-AjaxPro-Method", "userLogin");
                 using var loginResult = await httpClient.SendAsync(loginRequest);
                 var content = await loginResult.Content.ReadAsStringAsync();
-                if (content != "\"LoginOK\";/*")
+                var loginResultString = RegexCollections.GetLoginInfo().Match(content).Value;
+                if (loginResultString != "LoginOK")
                 {
-                    MessageBox.Show("登录失败！请检查账号密码是否正确", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(loginResultString, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
                 var wapRecordPageString = await httpClient.GetStringAsync(RequestTarget.WapRecordTodayPage);
@@ -105,17 +107,31 @@ namespace DormitoryCounter.Implementation
                 using var queryResult = await httpClient.SendAsync(queryRequest);
                 var queryResultContent = await queryResult.Content.ReadAsStringAsync();
                 htmlDocument.LoadHtml(queryResultContent);
-                var histories = htmlDocument.DocumentNode.SelectNodes("//body/form[1]/div[3]/div[2]/div[2]/table[1]");
+                var histories = htmlDocument.DocumentNode.SelectNodes("//body/form/div/div/div/table/tr/td/table/tr/td/a");
                 if (histories is null) return true;
-                var detailedIds = new List<Uri>();
-                foreach(var history in histories)
+                var detailedIdUris = new List<Uri>();
+                foreach (var history in histories)
                 {
-                    var phrase = history.GetAttributeValue("onclick",string.Empty);
+                    var phrase = history.GetAttributeValue("onclick", string.Empty);
                     var regex = RegexCollections.GetHistoryPageRegex();
                     var match = regex.Match(phrase);
                     if (!match.Success) continue;
-                    detailedIds.Add(RequestTarget.WapRecordShow(match.Value));
+                    detailedIdUris.Add(RequestTarget.WapRecordShow(match.Value));
                 }
+                var pointHistories = new List<PointHistory>();
+                foreach (var detailedIdUri in detailedIdUris)
+                {
+                    var detailedResultContent = await httpClient.GetStringAsync(detailedIdUri);
+                    htmlDocument.LoadHtml(detailedResultContent);
+                    pointHistories.Add(new PointHistory(htmlDocument.DocumentNode));
+                }
+                var dormitoryPoints = PointHistory.GetDormitoryPoints(pointHistories);
+                var result = new Dictionary<string, object>
+                {
+                    { "扣分记录", pointHistories },
+                    { "宿舍扣分", dormitoryPoints }
+                };
+                MiniExcel.SaveAs(targetOutputFile, result, overwriteFile: true);
                 return true;
             }
             catch (Exception ex)

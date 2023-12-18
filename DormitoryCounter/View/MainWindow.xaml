@@ -56,7 +56,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="EditOutputTargetButton" Content="修改文件输出位置" Grid.Column="0"/>
+            <Button x:Name="EditOutputTargetButton" Content="修改文件输出位置" Grid.Column="0" Click="EditOutputTargetButton_Click"/>
             <Button x:Name="StartCaptureData" Content="获取信息" Grid.Column="1" Click="StartCaptureData_Click"/>
         </Grid>
     </Grid>

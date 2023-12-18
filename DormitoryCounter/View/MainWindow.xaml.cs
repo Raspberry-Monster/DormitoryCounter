@@ -1,19 +1,8 @@
 ﻿using DormitoryCounter.Implementation;
 using DormitoryCounter.ViewModel;
+using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace DormitoryCounter
 {
@@ -26,16 +15,23 @@ namespace DormitoryCounter
         public MainWindow()
         {
             InitializeComponent();
-            _viewModel = (MainWindowViewModel)DataContext;           
+            _viewModel = (MainWindowViewModel)DataContext;
             ParseArgs(Environment.GetCommandLineArgs());
+            App.Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
         }
+
+        private void Current_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show(e.Exception.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            e.Handled = true;
+        }
+
         public void ParseArgs(string[] args)
         {
-            MessageBox.Show(args.Length.ToString());
-            for (int i =0; i <args.Length; i++)
+            for (int i = 0; i < args.Length; i++)
             {
                 var arg = args[i];
-                var nextArg = i+1 == args.Length ? string.Empty: args[i+1];
+                var nextArg = i + 1 == args.Length ? string.Empty : args[i + 1];
                 if (arg == "--user")
                 {
                     _viewModel.User = nextArg;
@@ -53,7 +49,25 @@ namespace DormitoryCounter
 
         private async void StartCaptureData_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrEmpty(_viewModel.OutputFileName))
+            {
+                MessageBox.Show("请选择导出位置", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             var result = await RequestClient.Query(_viewModel.User, _viewModel.Password, _viewModel.StartTime, _viewModel.EndTime, _viewModel.OutputFileName);
+            if (result) MessageBox.Show("导出完成", "信息", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void EditOutputTargetButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "*.xlsx|Xlsx";
+            saveFileDialog.Title = "保存";
+            saveFileDialog.DefaultExt = "xlsx";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                _viewModel.OutputFileName = saveFileDialog.FileName;
+            }
         }
     }
 }

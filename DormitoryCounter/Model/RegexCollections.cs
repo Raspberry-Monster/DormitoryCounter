@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace DormitoryCounter.Model
 {
@@ -11,5 +6,10 @@ namespace DormitoryCounter.Model
     {
         [GeneratedRegex(@"[0-9]+")]
         public static partial Regex GetHistoryPageRegex();
+        [GeneratedRegex(@"(\S*)(?=-\S*)")]
+        public static partial Regex GetDormitoryString();
+        [GeneratedRegex(@"(?!"")+(\S*)+(?="";/\*)")]
+        public static partial Regex GetLoginInfo();
+
     }
 }
