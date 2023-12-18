@@ -38,12 +38,12 @@ namespace DormitoryCounter.Model
                 if (!dict.ContainsKey(history.Dormitory)) dict[history.Dormitory] = 0d;
                 dict[history.Dormitory] += history.Point;
             }
-            dict.OrderBy(t => t.Value);
             var result = new List<DormitoryHistory>();
             foreach (var item in dict)
             {
                 result.Add(new DormitoryHistory { Dormitory = item.Key, Point = item.Value });
             }
+            result = result.OrderByDescending(t=>t.Point).ToList();
             return result;
         }
         public class DormitoryHistory
