@@ -108,7 +108,11 @@ namespace DormitoryCounter.Implementation
                 var queryResultContent = await queryResult.Content.ReadAsStringAsync();
                 htmlDocument.LoadHtml(queryResultContent);
                 var histories = htmlDocument.DocumentNode.SelectNodes("//body/form/div/div/div/table/tr/td/table/tr/td/a");
-                if (histories is null) return true;
+                if (histories is null)
+                {
+                    MessageBox.Show("恭喜! 目前无扣分记录", "信息", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return false;
+                }
                 var detailedIdUris = new List<Uri>();
                 foreach (var history in histories)
                 {

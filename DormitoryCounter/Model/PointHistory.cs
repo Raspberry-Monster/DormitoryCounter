@@ -43,7 +43,7 @@ namespace DormitoryCounter.Model
             {
                 result.Add(new DormitoryHistory { Dormitory = item.Key, Point = item.Value });
             }
-            result = result.OrderByDescending(t=>t.Point).ToList();
+            result = result.OrderBy(t => t.Point).ToList();
             return result;
         }
         public class DormitoryHistory
