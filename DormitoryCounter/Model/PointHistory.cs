@@ -41,7 +41,7 @@ namespace DormitoryCounter.Model
         {
             [ExcelColumnName("宿舍名")]
             public required string Dormitory { get; set; }
-            [ExcelColumnName("宿舍名")]
+            [ExcelColumnName("姓名")]
             public required string Name { get; set; }
             [ExcelColumnName("分数")]
             public required double Point { get; set; }
