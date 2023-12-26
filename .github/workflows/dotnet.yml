@@ -18,9 +18,9 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 8.x
     - name: Publish
-      run: dotnet publish p:PublishProfile=DormitoryCounter\Properties\PublishProfiles\PublishProfile.pubxml
+      run: dotnet publish p:PublishProfile=DormitoryCounter/Properties/PublishProfiles/PublishProfile.pubxml
     - name: Upload to artifact
       uses: actions/upload-artifact@main
       with:
