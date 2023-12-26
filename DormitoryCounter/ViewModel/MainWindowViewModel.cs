@@ -15,5 +15,7 @@ namespace DormitoryCounter.ViewModel
         private DateOnly endTime = DateOnly.FromDateTime(DateTime.Now);
         [ObservableProperty]
         private string outputFileName = string.Empty;
+        [ObservableProperty]
+        private bool orderByDescending = false;
     }
 }

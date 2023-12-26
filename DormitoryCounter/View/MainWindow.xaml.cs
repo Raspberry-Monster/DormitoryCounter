@@ -11,7 +11,7 @@ namespace DormitoryCounter
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel _viewModel;
+        private readonly MainWindowViewModel _viewModel;
         public MainWindow()
         {
             InitializeComponent();
@@ -54,16 +54,18 @@ namespace DormitoryCounter
                 MessageBox.Show("请选择导出位置", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var result = await RequestClient.Query(_viewModel.User, _viewModel.Password, _viewModel.StartTime, _viewModel.EndTime, _viewModel.OutputFileName);
+            var result = await RequestClient.Query(_viewModel.User, _viewModel.Password, _viewModel.StartTime, _viewModel.EndTime, _viewModel.OutputFileName, _viewModel.OrderByDescending);
             if (result) MessageBox.Show("导出完成", "信息", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void EditOutputTargetButton_Click(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "*.xlsx|Xlsx";
-            saveFileDialog.Title = "保存";
-            saveFileDialog.DefaultExt = "xlsx";
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "*.xlsx|Xlsx",
+                Title = "保存",
+                DefaultExt = "xlsx",
+            };
             if (saveFileDialog.ShowDialog() == true)
             {
                 _viewModel.OutputFileName = saveFileDialog.FileName;

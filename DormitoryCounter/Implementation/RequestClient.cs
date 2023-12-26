@@ -15,24 +15,30 @@ namespace DormitoryCounter.Implementation
 {
     public static class RequestClient
     {
+        public readonly static JsonSerializerOptions DefaultJsonSerializerOptions = new()
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
         public static string GetDateString(this DateOnly date)
         {
             return date.ToString("yyyy-MM-dd");
         }
         public static FormUrlEncodedContent CreateQueryHttpContent(Dictionary<string, string> webFormData, DateOnly startDate, DateOnly endDate)
         {
-            var contentDictionary = new Dictionary<string, string>();
-            contentDictionary.Add("__EVENTTARGET", string.Empty);
-            contentDictionary.Add("__EVENTARGUMENT", string.Empty);
-            contentDictionary.Add("__LASTFOCUS", string.Empty);
-            contentDictionary.Add("__VIEWSTATE", webFormData["__VIEWSTATE"]);
-            contentDictionary.Add("__VIEWSTATEGENERATOR", webFormData["__VIEWSTATEGENERATOR"]);
-            contentDictionary.Add("__EVENTVALIDATION", webFormData["__EVENTVALIDATION"]);
-            contentDictionary.Add("ddlStGrade", "0");
-            contentDictionary.Add("ddlStClass", string.Empty);
-            contentDictionary.Add("txbProjectDate1", startDate.GetDateString());
-            contentDictionary.Add("txbProjectDate2", endDate.GetDateString());
-            contentDictionary.Add("Button1", "查询");
+            var contentDictionary = new Dictionary<string, string>
+            {
+                { "__EVENTTARGET", string.Empty },
+                { "__EVENTARGUMENT", string.Empty },
+                { "__LASTFOCUS", string.Empty },
+                { "__VIEWSTATE", webFormData["__VIEWSTATE"] },
+                { "__VIEWSTATEGENERATOR", webFormData["__VIEWSTATEGENERATOR"] },
+                { "__EVENTVALIDATION", webFormData["__EVENTVALIDATION"] },
+                { "ddlStGrade", "0" },
+                { "ddlStClass", string.Empty },
+                { "txbProjectDate1", startDate.GetDateString() },
+                { "txbProjectDate2", endDate.GetDateString() },
+                { "Button1", "查询" }
+            };
             return new FormUrlEncodedContent(contentDictionary);
         }
         public static StringContent CreateLoginHttpContent(string userName, string passWord)
@@ -42,18 +48,10 @@ namespace DormitoryCounter.Implementation
                 UserName = userName,
                 Password = passWord
             };
-            var options = new JsonSerializerOptions()
-            {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-            var serializeResult = JsonSerializer.Serialize(user, options);
+            var serializeResult = JsonSerializer.Serialize(user, DefaultJsonSerializerOptions);
             return new StringContent(serializeResult, Encoding.UTF8);
         }
-        public static PointHistory GeneratePointHistory(HtmlDocument document)
-        {
-            throw new NotImplementedException();
-        }
-        public async static Task<bool> Query(string userName, string passWord, DateOnly startDate, DateOnly endDate, string targetOutputFile)
+        public async static Task<bool> Query(string userName, string passWord, DateOnly startDate, DateOnly endDate, string targetOutputFile, bool orderByDescending)
         {
             try
             {
@@ -129,11 +127,13 @@ namespace DormitoryCounter.Implementation
                     htmlDocument.LoadHtml(detailedResultContent);
                     pointHistories.Add(new PointHistory(htmlDocument.DocumentNode));
                 }
-                var dormitoryPoints = PointHistory.GetDormitoryPoints(pointHistories);
+                var dormitoryPoints = PointHistory.GetDormitoryPoints(pointHistories, orderByDescending);
+                var personPoints = PointHistory.GetPersonPoints(pointHistories, orderByDescending);
                 var result = new Dictionary<string, object>
                 {
                     { "扣分记录", pointHistories },
-                    { "宿舍扣分", dormitoryPoints }
+                    { "宿舍扣分", dormitoryPoints },
+                    {"单人扣分", personPoints }
                 };
                 MiniExcel.SaveAs(targetOutputFile, result, overwriteFile: true);
                 return true;
