@@ -23,4 +23,4 @@ jobs:
       uses: actions/upload-artifact@main
       with:
         name: DormitoryCounter.exe
-        path: bin\x64\Release\net8.0-windows\publish\win-x64\DormitoryCounter.exe
+        path: DormitoryCounter\bin\x64\Release\net8.0-windows\publish\win-x64\DormitoryCounter.exe
