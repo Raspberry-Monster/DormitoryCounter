@@ -6,8 +6,6 @@ name: .NET
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -20,7 +18,7 @@ jobs:
       with:
         dotnet-version: 8.x
     - name: Publish
-      run: dotnet publish p:PublishProfile=DormitoryCounter/Properties/PublishProfiles/PublishProfile.pubxml
+      run: dotnet publish DormitoryCounter.sln p:PublishProfile=DormitoryCounter/Properties/PublishProfiles/PublishProfile.pubxml
     - name: Upload to artifact
       uses: actions/upload-artifact@main
       with:
