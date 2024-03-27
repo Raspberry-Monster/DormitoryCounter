@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.60" />
     <PackageReference Include="MiniExcel" Version="1.31.3" />
     <PackageReference Include="ModernWpfUI" Version="0.9.6" />
     <PackageReference Include="System.Text.Json" Version="8.0.2" />
